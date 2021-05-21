@@ -1,0 +1,35 @@
+file_dir_names:
+  data_filename: "data/cost_ribbon_Kolchuga.csv"
+  output_fig_filename: "MOP_emin_SDR11.pdf"
+  figures_dirname: "figures"
+
+settings_for_figures:
+  background_color_fig: "#FDFDFD"
+  PE_color: "#2a2aa6"
+  Kolchuga_2mm_color: "#a62a2a"
+  Kolchuga_4mm_color: "#2aa62a"
+  vertic_lines_point_color: "#C9D6DF"
+  black_color: "#303841"
+  margin_left: 0.0001
+  margin_right: 0.0001
+  text_offset_x: 1.01
+  text_offset_y: 1.03
+  y_uplim_left: 2.5
+  y_step_left: 0.25
+  y_uplim_right: 1750
+  y_step_right: 125
+
+input_data_for_compute:
+  MOP_normative: 1.60
+  e_SDR: 0.010
+  dn: 0.110
+  ro_PE: 954
+  price_PE: 120
+  l_pipe: 1
+  MRS: 10.0
+  c0: 2
+  c1: 3.2
+  k_2mm: 1.98
+  k_4mm: 2.35
+  xvalue_SDR: [0.0042, 0.0053, 0.0063, 0.0066, 0.0081, 0.010, 0.0123]
+  xlabel_SDR: ["SDR 26", "SDR 21", "", "SDR 17", "SDR 13.6", "SDR 11", "SDR 9"]
