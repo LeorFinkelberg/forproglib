@@ -1,23 +1,12 @@
-## Сносный пример python-сценария, использующего концепцию переиспользования кода
+## Сокращения по проекту
+- КФ: _корреляционная функция_
+- ПСП: _псевдослучайный процесс_
+- ПСЧ: _псевдослучайное число_
 
-### Описание: один и тот же сценарий summary_PEpipe_Kolchuga.py используется для создания различных графиков (в рамках одного шаблона) и управления их внешним видом "на лету" (с помощью конфигурационных файлов \*.yaml), без внесения изменений в код сценария.
 
-#### Структура проекта
-
-```sh
-project/
-  -- python_scripts/
-    -- summary_PEpipe_Kolchuga.py
-  README.md
-  -- configs/
-    -- config_SDR9.yaml
-    -- config_SDR11.yaml
-    -- config_SDR17.yaml
+### Пример вызова сценария с конфигурационным файлом
 ```
-
-#### Пример использования
-```sh
-# в корне проекта
-$ python python_scripts\summary_PEpipe_Kolchuga.py /
-    --config-path configs\config_SDR9.yaml
+$ python python_scripts/main.py \
+    --config-path configs/gauss_processes_acf.yaml \
+    --output-fig-path figure/gauss_process_exp_acf.pdf
 ```
