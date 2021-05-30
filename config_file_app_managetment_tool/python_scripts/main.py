@@ -13,6 +13,7 @@
 МО: математическое ожидание
 """
 
+from pprint import pprint
 import math
 import pandas as pd
 import numpy as np
@@ -270,6 +271,6 @@ def gauss_with_expcossin_minus_acf_gen(
 
 
 if __name__ == "__main__":
-    path_to_config = cmd_line_parser()
+    path_to_config, path_to_figure = cmd_line_parser()
     configs = read_yaml_file(path_to_config)
-    print(configs)
+    pprint(configs)

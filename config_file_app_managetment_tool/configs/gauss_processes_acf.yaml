@@ -1,14 +1,25 @@
+---
+# *** MENU ***
+# Types of ACF (for `kind_acf`):
+# 1: exp type,
+# 2: exp-cos type,
+# 3: exp-cos-sin type (plus),
+# 4: exp-cos-sin type (minus)
+
 # *** MAIN CONTROL PARAMETERS ***
-sigma: !!float 2
-w_star: !!float 1.25
-delta_t: !!float 0.05
-N: !!int 1000
+sigma: !!float 2        # standard deviation
+w_star: !!float 1.25    # model parameter
+w0: !!float 3.0         # model parameter
+delta_t: !!float 0.05   # time step
+N: !!int 1000           # number of counts
+kind_acf: !!int 1       # ACF type
 
 
-# *** OTHER APP SETTINGS *** 
+# *** OTHERS APP SETTINGS *** 
 colors:
-  blue_purple: !!str &blue_purple "#AA96DA" # голубой колакольчик
-  fire_sienna: !!str &fire_sienna "#F08A5D" # огенная сиенна
+  blue_purple: !!str &blue_purple "#8785A2"
+  fire_sienna: !!str &fire_sienna "#F08A5D"
 
 figure_settings:
   bg_color: *blue_purple
+...
