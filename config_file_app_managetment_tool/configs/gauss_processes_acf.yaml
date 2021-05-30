@@ -1,0 +1,14 @@
+# *** MAIN CONTROL PARAMETERS ***
+sigma: !!float 2
+w_star: !!float 1.25
+delta_t: !!float 0.05
+N: !!int 1000
+
+
+# *** OTHER APP SETTINGS *** 
+colors:
+  blue_purple: !!str &blue_purple "#AA96DA" # голубой колакольчик
+  fire_sienna: !!str &fire_sienna "#F08A5D" # огенная сиенна
+
+figure_settings:
+  bg_color: *blue_purple
