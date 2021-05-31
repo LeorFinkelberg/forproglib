@@ -7,19 +7,32 @@
 # 4: exp-cos-sin type (minus)
 
 # *** MAIN CONTROL PARAMETERS ***
-sigma: !!float 2        # standard deviation
-w_star: !!float 1.25    # model parameter
-w0: !!float 3.0         # model parameter
-delta_t: !!float 0.05   # time step
-N: !!int 1000           # number of counts
-kind_acf: !!int 1       # ACF type
+sigma: !!float 2            # standard deviation
+w_star: !!float 1.35        # model parameter
+w0: !!float 3.0             # model parameter
+alpha: !!float 0.05         # smoothing factor for EWMA
+window_width: !!int 14  # width of window in MA 
+delta_t: !!float 0.05       # time step
+N: !!int 1000               # number of counts
+kind_acf: !!int 2           # ACF type
 
 
-# *** OTHERS APP SETTINGS *** 
+# *** OTHERS APP SETTINGS ***
+visibility:
+  ma_show: !!bool true
+
 colors:
+  grey: !!str &grey "#52616B"
   blue_purple: !!str &blue_purple "#8785A2"
-  fire_sienna: !!str &fire_sienna "#F08A5D"
+  terakotta: !!str &terakotta "#E84A5F"
+  pearl_night: !!str &pearl_night "#112D4E"
+  krayola_green: !!str &krayola_green "#1CAC78"
 
 figure_settings:
-  bg_color: *blue_purple
+  height_main_fig: !!int 10
+  width_main_fig: !!int 14
+  left_xlim_acf: !!float 0.
+  right_xlim_acf: !!float 4.
+  left_xlim_pdf: !!float -9
+  right_xlim_pdf: !!float 9
 ...
