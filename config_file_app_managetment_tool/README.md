@@ -6,6 +6,7 @@
 
 
 ## Структура проекта
+```sh
 .
 configs/
   `- gauss_processes_acf.yaml
@@ -18,6 +19,7 @@ python_scripts
   `- main.py
   `- helper_funcs_and_class_schema.py
 README.md
+```
 
 
 ### Пример вызова сценария с конфигурационным файлом
