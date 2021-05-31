@@ -1,12 +1,12 @@
-from typing import Tuple, NoReturn
-import yaml
-import sys
 import argparse
-from pathlib2 import Path
+import sys
 from dataclasses import dataclass, field
-import marshmallow
-from marshmallow_dataclass import class_schema
+from typing import NoReturn, Tuple
 
+import marshmallow
+import yaml
+from marshmallow_dataclass import class_schema
+from pathlib2 import Path
 
 valid_min = lambda min_value: marshmallow.validate.Range(min=min_value)
 valid_min_max = lambda min_value, max_value: marshmallow.validate.Range(
@@ -100,7 +100,7 @@ def read_yaml_file(config_path: str) -> Params:
     abspath_to_config_file = Path(config_path).absolute()
 
     try:
-        with open(abspath_to_config_file, "r") as fo:
+        with open(abspath_to_config_file) as fo:
             return schema.load(yaml.safe_load(fo))  # вернет обычный словарь Python
     except ValueError as err:
         print_err_and_exit(err)
@@ -117,7 +117,8 @@ def cmd_line_parser() -> Tuple[str, str]:
     Возвращает
     ----------
     Путь до конфигурационного файла,
-    переданный через флаг --config-path
+    переданный через флаг --config-path и
+    путь до файла-сводки
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("--config-path", type=str)

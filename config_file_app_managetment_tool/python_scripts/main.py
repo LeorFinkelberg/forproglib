@@ -14,18 +14,15 @@
 """
 
 import math
-import pandas as pd
-import numpy as np
+from typing import NoReturn, Tuple
+
 import matplotlib.pyplot as plt
-import seaborn as sns
+import numpy as np
 import numpy.random as rnd
-from typing import Tuple, NoReturn
+import pandas as pd
+import seaborn as sns
+from helper_funcs_and_class_schema import Params, cmd_line_parser, read_yaml_file
 from pathlib2 import Path
-from helper_funcs_and_class_schema import (
-    Params,
-    read_yaml_file,
-    cmd_line_parser,
-)
 
 
 def gauss_with_exp_acf_gen(
@@ -374,7 +371,11 @@ def exp_cos_sin_acf_base(
     )
 
 
-def gauss01(*, sigma: float, N: int = 150,) -> Tuple[np.array, np.array]:
+def gauss01(
+    *,
+    sigma: float,
+    N: int = 150,
+) -> Tuple[np.array, np.array]:
     """
     Возвращает массив ординат
     гауссовой плотности распределения
@@ -385,10 +386,17 @@ def gauss01(*, sigma: float, N: int = 150,) -> Tuple[np.array, np.array]:
         configs.figure_settings.right_xlim_pdf,
         N,
     )
-    return np.array([
-        1 / ( sigma * math.sqrt(2 * math.pi) ) * math.exp( - x**2 / ( 2 * sigma**2 ) )
-        for x in xi
-    ]), xi
+    return (
+        np.array(
+            [
+                1
+                / (sigma * math.sqrt(2 * math.pi))
+                * math.exp(-(x ** 2) / (2 * sigma ** 2))
+                for x in xi
+            ]
+        ),
+        xi,
+    )
 
 
 def remove_right_top_axis(ax) -> NoReturn:
@@ -415,10 +423,10 @@ def draw_graph(
 
     fig = plt.figure(
         figsize=(
-            configs.figure_settings.width_main_fig, 
-            configs.figure_settings.height_main_fig
-            )
+            configs.figure_settings.width_main_fig,
+            configs.figure_settings.height_main_fig,
         )
+    )
     grid = plt.GridSpec(2, 5, wspace=0.35, hspace=0.45)
 
     sns.set_context(
@@ -441,8 +449,16 @@ def draw_graph(
     process_std = process.rolling(window=configs.window_width).std()
     acf = pd.Series(acf)
     gauss01_pdf, gauss01_xi = gauss01(sigma=configs.sigma)
-    
-    hline_params = dict(y=0, xmin=0, xmax=configs.N, lw=1., alpha=0.7, color=configs.colors.grey, dashes=(10, 8))
+
+    hline_params = dict(
+        y=0,
+        xmin=0,
+        xmax=configs.N,
+        lw=1.0,
+        alpha=0.7,
+        color=configs.colors.grey,
+        dashes=(10, 8),
+    )
 
     ax1.plot(
         process,
@@ -465,11 +481,10 @@ def draw_graph(
     ax1.plot(
         process_ma - 3 * process_std, label=None, color=configs.colors.krayola_green
     )
-    
+
     ax1.set_title(
-        ("Сводка по анализу выбросов в "
-        "стационарном гауссовском процессе")
-        , fontsize=12
+        ("Сводка по анализу выбросов в " "стационарном гауссовском процессе"),
+        fontsize=12,
     )
     # ax1.axhline(**hline_params)
     ax1.set_facecolor(configs.colors.white)
@@ -478,10 +493,10 @@ def draw_graph(
     ax1.set_xlabel("временная координата " + r"$ t $")
     ax1.set_ylabel("ординаты процесса " + r"$ \xi $")
     ax1.set_xticks(range(0, configs.N + 1, 100))
-    
+
     ax2.set_title("Плотность распределения \nординат процесса")
-    process.plot.kde(ax=ax2, label = "Эмпир-ская", color=configs.colors.pearl_night)  
-    ax2.plot(gauss01_xi, gauss01_pdf, label = "Теор-ская", color=configs.colors.terakotta)
+    process.plot.kde(ax=ax2, label="Эмпир-ская", color=configs.colors.pearl_night)
+    ax2.plot(gauss01_xi, gauss01_pdf, label="Теор-ская", color=configs.colors.terakotta)
     ax2.set_xlabel("ординаты " + r"$ \xi $")
     ax2.set_ylabel(r"$ f(\xi) $")
     ax2.set_xlim(
@@ -498,19 +513,12 @@ def draw_graph(
     ax3.set_xlabel("сдвиг " + r"$ \tau $")
     ax3.set_ylabel(r"$ K_{\xi}(\tau) $")
     ax3.set_xlim(
-        configs.figure_settings.left_xlim_acf,
-        configs.figure_settings.right_xlim_acf
+        configs.figure_settings.left_xlim_acf, configs.figure_settings.right_xlim_acf
     )
     ax3.set_facecolor(configs.colors.white)
     # remove_right_top_axis(ax3)
 
-    
-    fig.savefig(
-        abspath_to_output_fig,
-        dpi=350,
-        bbox_inches="tight",
-        pad_inches=0.25
-    )
+    fig.savefig(abspath_to_output_fig, dpi=350, bbox_inches="tight", pad_inches=0.25)
 
 
 if __name__ == "__main__":

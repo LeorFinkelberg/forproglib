@@ -5,6 +5,21 @@
 - МО: _математическое ожидание_
 
 
+## Структура проекта
+.
+configs/
+  `- gauss_processes_acf.yaml
+figure_exapmples/
+  `- gauss_exp_acf.pdf
+  `- ...
+figures/
+  `- *.pdf
+python_scripts
+  `- main.py
+  `- helper_funcs_and_class_schema.py
+README.md
+
+
 ### Пример вызова сценария с конфигурационным файлом
 ```sh
 $ python python_scripts/main.py \
@@ -14,7 +29,7 @@ $ python python_scripts/main.py \
 
 ### Приемы работы с потоковым редактором sed
 ```sh
-# изменяем значение параметра w0 на 3.15 и сохраняем 
+# изменяем значение параметра w0 на 3.15 и сохраняем
 # новый конфигурационный файл под именем gauss_exp_acf_w0=3.15.yaml
 $ sed 's/w0: !!float 3.0/w0: !!float 3.15/' configs/gauss_processes_acf.yaml \
     > configs/gauss_exp_acf_w0=3.15.yaml
