@@ -20,7 +20,8 @@ class Colors:
     Вспомогательный параметрический
     класс цветовых решений
     """
-
+    
+    outliers_red: str
     blue_purple: str
     terakotta: str
     pearl_night: str
@@ -69,9 +70,13 @@ class Params:
     w0: float = field(metadata={"validate": valid_min(1.0)}, default=3.0)
     alpha: float = field(metadata={"validate": valid_min(0.01)}, default=0.15)
     window_width: int = field(metadata={"validate": valid_min(3)}, default=10)
-    delta_t: float = field(metadata={"validate": valid_min(0.01)}, default=0.05)
+    delta_t: float = field(
+        metadata={"validate": valid_min(0.01)}, default=0.05
+    )
     N: int = field(metadata={"validate": valid_min(10)}, default=1000)
-    kind_acf: int = field(metadata={"validate": valid_min_max(1, 4)}, default=1)
+    kind_acf: int = field(
+        metadata={"validate": valid_min_max(1, 4)}, default=1
+    )
 
 
 ParamsSchema = class_schema(Params)
@@ -101,7 +106,9 @@ def read_yaml_file(config_path: str) -> Params:
 
     try:
         with open(abspath_to_config_file) as fo:
-            return schema.load(yaml.safe_load(fo))  # вернет обычный словарь Python
+            return schema.load(
+                yaml.safe_load(fo)
+            )  # вернет обычный словарь Python
     except ValueError as err:
         print_err_and_exit(err)
     except marshmallow.ValidationError as err:

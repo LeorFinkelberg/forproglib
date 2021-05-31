@@ -21,7 +21,11 @@ import numpy as np
 import numpy.random as rnd
 import pandas as pd
 import seaborn as sns
-from helper_funcs_and_class_schema import Params, cmd_line_parser, read_yaml_file
+from helper_funcs_and_class_schema import (
+    Params,
+    cmd_line_parser,
+    read_yaml_file,
+)
 from pathlib2 import Path
 
 
@@ -301,17 +305,22 @@ def exp_acf(
     *,
     sigma: float,
     w_star: float,
-    N: int = 150,
+    N: int = 250,
 ) -> Tuple[np.array, np.array]:
     """
     Возвращает массив ординат
     КФ экспоненциального типа
     """
     tau = np.linspace(
-        configs.figure_settings.left_xlim_acf, configs.figure_settings.right_xlim_acf, N
+        configs.figure_settings.left_xlim_acf,
+        configs.figure_settings.right_xlim_acf,
+        N,
     )
 
-    return np.array([sigma ** 2 * math.exp(-w_star * abs(t)) for t in tau]), tau
+    return (
+        np.array([sigma ** 2 * math.exp(-w_star * abs(t)) for t in tau]),
+        tau,
+    )
 
 
 def exp_cos_acf(
@@ -319,19 +328,24 @@ def exp_cos_acf(
     sigma: float,
     w_star: float,
     w0: float,
-    N: int = 150,
+    N: int = 250,
 ) -> Tuple[np.array, np.array]:
     """
     Возвращает массив ординат
     КФ экспоненциально-косинусного типа
     """
     tau = np.linspace(
-        configs.figure_settings.left_xlim_acf, configs.figure_settings.right_xlim_acf, N
+        configs.figure_settings.left_xlim_acf,
+        configs.figure_settings.right_xlim_acf,
+        N,
     )
 
     return (
         np.array(
-            [sigma ** 2 * math.exp(-w_star * abs(t)) * math.cos(w0 * t) for t in tau]
+            [
+                sigma ** 2 * math.exp(-w_star * abs(t)) * math.cos(w0 * t)
+                for t in tau
+            ]
         ),
         tau,
     )
@@ -343,7 +357,7 @@ def exp_cos_sin_acf_base(
     sigma: float,
     w_star: float,
     w0: float,
-    N: int = 150,
+    N: int = 250,
 ) -> Tuple[np.array, np.array]:
     """
     Возвращает массив ординат
@@ -355,7 +369,9 @@ def exp_cos_sin_acf_base(
         k = -1
 
     tau = np.linspace(
-        configs.figure_settings.left_xlim_acf, configs.figure_settings.right_xlim_acf, N
+        configs.figure_settings.left_xlim_acf,
+        configs.figure_settings.right_xlim_acf,
+        N,
     )
 
     return (
@@ -374,7 +390,7 @@ def exp_cos_sin_acf_base(
 def gauss01(
     *,
     sigma: float,
-    N: int = 150,
+    N: int = 250,
 ) -> Tuple[np.array, np.array]:
     """
     Возвращает массив ординат
@@ -399,9 +415,52 @@ def gauss01(
     )
 
 
-def remove_right_top_axis(ax) -> NoReturn:
-    ax.spines["right"].set_visible(False)
-    ax.spines["top"].set_visible(False)
+def Zscore(
+    data: np.array,
+    threshold: float = 3.0,
+) -> Tuple[tuple, np.array]:
+    """
+    Вычисляет классическую Z-оценку
+    на выборочных средних.
+    NB: На практике следует применять с большой осторожностью
+    """
+    mean = np.mean(data)
+    std = np.std(data)
+    Zscore = (data - mean) / std
+    
+    indexes = np.where((Zscore > threshold) | (Zscore < - threshold))
+    outliers = data[indexes]
+    
+    return indexes, outliers
+    
+
+def modified_Zscore_median(
+    data: np.array,
+    threshold: float = 3.5,
+) -> Tuple[tuple, np.array]:
+    """
+    Вычисляет робастную Z-оценку на медианах
+    """
+    scale_factor = 0.6745
+    median = np.median(data)
+    MAD = np.median(np.abs(data - median))
+    modif_Zscore = scale_factor * (data - median) / MAD
+    
+    indexes = np.where((modif_Zscore > threshold) | (modif_Zscore < - threshold))
+    outliers = data[indexes]
+    
+    return indexes, outliers
+
+
+def outlier_label_maker(
+    *,
+    ax,
+    indexes: np.array,
+    outliers: np.array,
+    delta_x: float = -35,
+):
+    for idx, (x, y) in enumerate(zip(indexes, outliers)):
+        ax.text(x + delta_x, y, s=f"{outliers[idx]:.2f}", color=configs.colors.outliers_red)
 
 
 def draw_graph(
@@ -427,7 +486,7 @@ def draw_graph(
             configs.figure_settings.height_main_fig,
         )
     )
-    grid = plt.GridSpec(2, 5, wspace=0.35, hspace=0.45)
+    grid = plt.GridSpec(2, 5, wspace=0.35, hspace=0.42)
 
     sns.set_context(
         "paper",
@@ -441,62 +500,85 @@ def draw_graph(
     )
 
     ax1 = plt.subplot(grid[:, :-1])
-    ax2 = plt.subplot(grid[0, -1])
-    ax3 = plt.subplot(grid[1, -1])
+    ax2 = plt.subplot(grid[0, -1:])
+    ax3 = plt.subplot(grid[1, -1:])
 
     process = pd.Series(process)
     process_ma = process.rolling(window=configs.window_width).mean()
     process_std = process.rolling(window=configs.window_width).std()
     acf = pd.Series(acf)
     gauss01_pdf, gauss01_xi = gauss01(sigma=configs.sigma)
-
-    hline_params = dict(
-        y=0,
-        xmin=0,
-        xmax=configs.N,
-        lw=1.0,
-        alpha=0.7,
-        color=configs.colors.grey,
-        dashes=(10, 8),
-    )
+    idx_Zscore, out_Zscore = Zscore(process.to_numpy())
+    idx_modif_Zscore, out_modif_Zscore = modified_Zscore_median(process.to_numpy())
 
     ax1.plot(
         process,
         label=(
-            "Реализация гауссовского процесса \n"
-            f"с КФ {acf_types[configs.kind_acf]} типа"
+            "Реализация гауссовского процесса"
         ),
         color=configs.colors.pearl_night,
     )
+    
+    ax1.scatter(
+        idx_Zscore[0],
+        out_Zscore,
+        label="Выбросы по классической Z-оценке",
+        s = 50,
+        marker = "s",
+        color = configs.colors.outliers_red
+    )
+    outlier_label_maker(ax=ax1, indexes=idx_Zscore[0], outliers=out_Zscore)
+    
+    ax1.scatter(
+        idx_modif_Zscore[0],
+        out_modif_Zscore,
+        label="Выбросы по модифицированной \nустойчивой Z-оценке",
+        s = 50,
+        marker = "o",
+        color = configs.colors.outliers_red
+    )
+    outlier_label_maker(ax=ax1, indexes=idx_modif_Zscore[0], outliers=out_modif_Zscore)
 
     if configs.visibility.ma_show == True:
         ax1.plot(
-            process_ma, label=("Cкользящее среднее"), color=configs.colors.terakotta
+            process_ma,
+            label=("Cкользящее среднее"),
+            color=configs.colors.terakotta,
         )
     ax1.plot(
-        process_ma + 3 * process_std,
-        label=("Скользящее станадартное \nотклонение с коэффициентом 3"),
+        process_ma + 2.5 * process_std,
+        label=("Скользящее станадартное \nотклонение с коэффициентом 2.5"),
         color=configs.colors.krayola_green,
     )
     ax1.plot(
-        process_ma - 3 * process_std, label=None, color=configs.colors.krayola_green
+        process_ma - 2.5 * process_std,
+        label=None,
+        color=configs.colors.krayola_green,
     )
 
     ax1.set_title(
-        ("Сводка по анализу выбросов в " "стационарном гауссовском процессе"),
+        (
+            "Сводка по анализу выбросов в стационарном гауссовском \n"
+            f"псевдослучайном процессе с КФ {acf_types[configs.kind_acf]} типа"
+        ),
         fontsize=12,
     )
-    # ax1.axhline(**hline_params)
     ax1.set_facecolor(configs.colors.white)
     ax1.legend(loc="best", frameon=False)
-    # remove_right_top_axis(ax1)
     ax1.set_xlabel("временная координата " + r"$ t $")
     ax1.set_ylabel("ординаты процесса " + r"$ \xi $")
     ax1.set_xticks(range(0, configs.N + 1, 100))
 
     ax2.set_title("Плотность распределения \nординат процесса")
-    process.plot.kde(ax=ax2, label="Эмпир-ская", color=configs.colors.pearl_night)
-    ax2.plot(gauss01_xi, gauss01_pdf, label="Теор-ская", color=configs.colors.terakotta)
+    process.plot.kde(
+        ax=ax2, label="Эмпирическая", color=configs.colors.pearl_night
+    )
+    ax2.plot(
+        gauss01_xi,
+        gauss01_pdf,
+        label="Теоретическая",
+        color=configs.colors.terakotta,
+    )
     ax2.set_xlabel("ординаты " + r"$ \xi $")
     ax2.set_ylabel(r"$ f(\xi) $")
     ax2.set_xlim(
@@ -504,21 +586,21 @@ def draw_graph(
         configs.figure_settings.right_xlim_pdf,
     )
     ax2.set_facecolor(configs.colors.white)
-    ax2.legend(loc="best", frameon=False)
-    # remove_right_top_axis(ax2)
+    ax2.legend(loc=3, frameon=False)
 
     ax3.set_title(f"КФ {acf_types[configs.kind_acf]} типа")
     ax3.plot(tau, acf, color=configs.colors.terakotta)
-    # ax3.axhline(**hline_params)
     ax3.set_xlabel("сдвиг " + r"$ \tau $")
     ax3.set_ylabel(r"$ K_{\xi}(\tau) $")
     ax3.set_xlim(
-        configs.figure_settings.left_xlim_acf, configs.figure_settings.right_xlim_acf
+        configs.figure_settings.left_xlim_acf,
+        configs.figure_settings.right_xlim_acf,
     )
     ax3.set_facecolor(configs.colors.white)
-    # remove_right_top_axis(ax3)
 
-    fig.savefig(abspath_to_output_fig, dpi=350, bbox_inches="tight", pad_inches=0.25)
+    fig.savefig(
+        abspath_to_output_fig, dpi=350, bbox_inches="tight", pad_inches=0.25
+    )
 
 
 if __name__ == "__main__":
@@ -527,8 +609,8 @@ if __name__ == "__main__":
 
     acf_types = {
         1: "экспоненциального",
-        2: "экспоненциально-\nкосинусного",
-        3: "экспоненциально-косинусно\n-синусного (плюс)",
+        2: "экспоненциально-косинусного",
+        3: "экспоненциально-косинусно-\nсинусного (плюс)",
         4: "экспоненциально-косинусно-\nсинусного (минус)",
     }
 
@@ -551,7 +633,9 @@ if __name__ == "__main__":
         acf, tau = exp_cos_acf(
             sigma=configs.sigma, w_star=configs.w_star, w0=configs.w0
         )
-    elif configs.kind_acf == 3:  # КФ экспоненциально-косинусно-синусного типа (плюс)
+    elif (
+        configs.kind_acf == 3
+    ):  # КФ экспоненциально-косинусно-синусного типа (плюс)
         gauss_process = gauss_with_expcossin_plus_acf_gen(
             sigma=configs.sigma,
             w_star=configs.w_star,
@@ -562,7 +646,9 @@ if __name__ == "__main__":
         acf, tau = exp_cos_sin_acf_base(
             sign="+", sigma=configs.sigma, w_star=configs.w_star, w0=configs.w0
         )
-    elif configs.kind_acf == 4:  # КФ экспоненциально-косинусно-синусного типа (минус)
+    elif (
+        configs.kind_acf == 4
+    ):  # КФ экспоненциально-косинусно-синусного типа (минус)
         gauss_process = gauss_with_expcossin_minus_acf_gen(
             sigma=configs.sigma,
             w_star=configs.w_star,
