@@ -108,6 +108,3 @@ venv.bak/
 
 # macOs
 .DS_Store
-
-# side files
-figures/
