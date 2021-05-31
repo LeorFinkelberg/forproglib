@@ -26,6 +26,7 @@ class Colors:
     pearl_night: str
     krayola_green: str
     grey: str
+    white: str
 
 
 @dataclass

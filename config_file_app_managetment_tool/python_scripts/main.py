@@ -391,6 +391,11 @@ def gauss01(*, sigma: float, N: int = 150,) -> Tuple[np.array, np.array]:
     ]), xi
 
 
+def remove_right_top_axis(ax) -> NoReturn:
+    ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
+
+
 def draw_graph(
     configs: Params,
     process: np.array,
@@ -414,7 +419,7 @@ def draw_graph(
             configs.figure_settings.height_main_fig
             )
         )
-    grid = plt.GridSpec(3, 4, wspace=0.35, hspace=0.45)
+    grid = plt.GridSpec(2, 5, wspace=0.35, hspace=0.45)
 
     sns.set_context(
         "paper",
@@ -427,10 +432,9 @@ def draw_graph(
         },
     )
 
-    ax1 = plt.subplot(grid[:2, :])
-    ax2 = plt.subplot(grid[2, :1])
-    ax3 = plt.subplot(grid[2, 1:2])
-    ax4 = plt.subplot(grid[2, 2:])
+    ax1 = plt.subplot(grid[:, :-1])
+    ax2 = plt.subplot(grid[0, -1])
+    ax3 = plt.subplot(grid[1, -1])
 
     process = pd.Series(process)
     process_ma = process.rolling(window=configs.window_width).mean()
@@ -438,7 +442,7 @@ def draw_graph(
     acf = pd.Series(acf)
     gauss01_pdf, gauss01_xi = gauss01(sigma=configs.sigma)
     
-    hline_params = dict(y=0, xmin=0, xmax=configs.N, lw=1., alpha=0.7, color=configs.colors.grey)
+    hline_params = dict(y=0, xmin=0, xmax=configs.N, lw=1., alpha=0.7, color=configs.colors.grey, dashes=(10, 8))
 
     ax1.plot(
         process,
@@ -467,8 +471,10 @@ def draw_graph(
         "стационарном гауссовском процессе")
         , fontsize=12
     )
-    ax1.axhline(**hline_params)
-    ax1.legend(loc=1)
+    # ax1.axhline(**hline_params)
+    ax1.set_facecolor(configs.colors.white)
+    ax1.legend(loc="best", frameon=False)
+    # remove_right_top_axis(ax1)
     ax1.set_xlabel("временная координата " + r"$ t $")
     ax1.set_ylabel("ординаты процесса " + r"$ \xi $")
     ax1.set_xticks(range(0, configs.N + 1, 100))
@@ -482,20 +488,29 @@ def draw_graph(
         configs.figure_settings.left_xlim_pdf,
         configs.figure_settings.right_xlim_pdf,
     )
-    ax2.legend(loc=4)
+    ax2.set_facecolor(configs.colors.white)
+    ax2.legend(loc="best", frameon=False)
+    # remove_right_top_axis(ax2)
 
     ax3.set_title(f"КФ {acf_types[configs.kind_acf]} типа")
-    ax3.plot(tau, acf, color=configs.colors.pearl_night)
-    ax3.axhline(**hline_params)
+    ax3.plot(tau, acf, color=configs.colors.terakotta)
+    # ax3.axhline(**hline_params)
     ax3.set_xlabel("сдвиг " + r"$ \tau $")
     ax3.set_ylabel(r"$ K_{\xi}(\tau) $")
     ax3.set_xlim(
         configs.figure_settings.left_xlim_acf,
         configs.figure_settings.right_xlim_acf
     )
+    ax3.set_facecolor(configs.colors.white)
+    # remove_right_top_axis(ax3)
 
     
-    fig.savefig(abspath_to_output_fig, dpi=350, bbox_inches="tight")
+    fig.savefig(
+        abspath_to_output_fig,
+        dpi=350,
+        bbox_inches="tight",
+        pad_inches=0.25
+    )
 
 
 if __name__ == "__main__":

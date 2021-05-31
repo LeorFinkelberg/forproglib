@@ -22,6 +22,7 @@ visibility:
   ma_show: !!bool true
 
 colors:
+  white: !!str &white "#FDFDFD"
   grey: !!str &grey "#52616B"
   blue_purple: !!str &blue_purple "#8785A2"
   terakotta: !!str &terakotta "#E84A5F"
@@ -29,8 +30,8 @@ colors:
   krayola_green: !!str &krayola_green "#1CAC78"
 
 figure_settings:
-  height_main_fig: !!int 10
-  width_main_fig: !!int 14
+  height_main_fig: !!int 7
+  width_main_fig: !!int 18
   left_xlim_acf: !!float 0.
   right_xlim_acf: !!float 4.
   left_xlim_pdf: !!float -9
