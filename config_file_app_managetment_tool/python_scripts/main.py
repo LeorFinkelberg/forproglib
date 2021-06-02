@@ -6,9 +6,11 @@
 """
 
 import math
+import sys
 from typing import NoReturn, Tuple
 
 import matplotlib.pyplot as plt
+import logging
 import numpy as np
 import numpy.random as rnd
 import pandas as pd
@@ -20,6 +22,16 @@ from helper_funcs_and_class_schema import (
 )
 from pathlib2 import Path
 
+
+file_log = logging.FileHandler(Path("logs/app_logs.log").absolute())
+console_out = logging.StreamHandler(sys.stdout)
+
+logging.basicConfig(
+    handlers=(file_log, console_out),
+    format=("[%(asctime)s | %(levelname)s]: %(message)s"),
+    datefmt="%Y-%m-%d %H:%M:%S",
+    level=logging.INFO,
+)
 
 def gauss_with_exp_acf_gen(
     *,
@@ -419,12 +431,12 @@ def Zscore(
     mean = np.mean(data)
     std = np.std(data)
     Zscore = (data - mean) / std
-    
-    indexes = np.where((Zscore > threshold) | (Zscore < - threshold))
+
+    indexes = np.where((Zscore > threshold) | (Zscore < -threshold))
     outliers = data[indexes]
-    
+
     return indexes, outliers
-    
+
 
 def modified_Zscore_median(
     data: np.array,
@@ -437,10 +449,12 @@ def modified_Zscore_median(
     median = np.median(data)
     MAD = np.median(np.abs(data - median))
     modif_Zscore = scale_factor * (data - median) / MAD
-    
-    indexes = np.where((modif_Zscore > threshold) | (modif_Zscore < - threshold))
+
+    indexes = np.where(
+        (modif_Zscore > threshold) | (modif_Zscore < -threshold)
+    )
     outliers = data[indexes]
-    
+
     return indexes, outliers
 
 
@@ -452,7 +466,12 @@ def outlier_label_maker(
     delta_x: float = -35,
 ):
     for idx, (x, y) in enumerate(zip(indexes, outliers)):
-        ax.text(x + delta_x, y, s=f"{outliers[idx]:.2f}", color=configs.colors.outliers_red)
+        ax.text(
+            x + delta_x,
+            y,
+            s=f"{outliers[idx]:.2f}",
+            color=configs.colors.outliers_red,
+        )
 
 
 def draw_graph(
@@ -501,35 +520,37 @@ def draw_graph(
     acf = pd.Series(acf)
     gauss01_pdf, gauss01_xi = gauss01(sigma=configs.sigma)
     idx_Zscore, out_Zscore = Zscore(process.to_numpy())
-    idx_modif_Zscore, out_modif_Zscore = modified_Zscore_median(process.to_numpy())
+    idx_modif_Zscore, out_modif_Zscore = modified_Zscore_median(
+        process.to_numpy()
+    )
 
     ax1.plot(
         process,
-        label=(
-            "Реализация гауссовского процесса"
-        ),
+        label=("Реализация гауссовского процесса"),
         color=configs.colors.pearl_night,
     )
-    
+
     ax1.scatter(
         idx_Zscore[0],
         out_Zscore,
         label="Выбросы по классической Z-оценке",
-        s = 50,
-        marker = "s",
-        color = configs.colors.outliers_red
+        s=50,
+        marker="s",
+        color=configs.colors.outliers_red,
     )
     outlier_label_maker(ax=ax1, indexes=idx_Zscore[0], outliers=out_Zscore)
-    
+
     ax1.scatter(
         idx_modif_Zscore[0],
         out_modif_Zscore,
         label="Выбросы по модифицированной \nустойчивой Z-оценке",
-        s = 50,
-        marker = "o",
-        color = configs.colors.outliers_red
+        s=50,
+        marker="o",
+        color=configs.colors.outliers_red,
     )
-    outlier_label_maker(ax=ax1, indexes=idx_modif_Zscore[0], outliers=out_modif_Zscore)
+    outlier_label_maker(
+        ax=ax1, indexes=idx_modif_Zscore[0], outliers=out_modif_Zscore
+    )
 
     if configs.visibility.ma_show == True:
         ax1.plot(

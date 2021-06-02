@@ -20,7 +20,7 @@ class Colors:
     Вспомогательный параметрический
     класс цветовых решений
     """
-    
+
     outliers_red: str
     blue_purple: str
     terakotta: str
