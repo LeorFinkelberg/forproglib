@@ -10,7 +10,6 @@ import sys
 from typing import NoReturn, Tuple
 
 import matplotlib.pyplot as plt
-import logging
 import numpy as np
 import numpy.random as rnd
 import pandas as pd
@@ -22,16 +21,6 @@ from helper_funcs_and_class_schema import (
 )
 from pathlib2 import Path
 
-
-file_log = logging.FileHandler(Path("logs/app_logs.log").absolute())
-console_out = logging.StreamHandler(sys.stdout)
-
-logging.basicConfig(
-    handlers=(file_log, console_out),
-    format=("[%(asctime)s | %(levelname)s]: %(message)s"),
-    datefmt="%Y-%m-%d %H:%M:%S",
-    level=logging.INFO,
-)
 
 def gauss_with_exp_acf_gen(
     *,

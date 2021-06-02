@@ -1,4 +1,5 @@
 import argparse
+import logging
 import sys
 from dataclasses import dataclass, field
 from typing import NoReturn, Tuple
@@ -7,6 +8,17 @@ import marshmallow
 import yaml
 from marshmallow_dataclass import class_schema
 from pathlib2 import Path
+
+
+file_log = logging.FileHandler("app_logs.log")
+console_out = logging.StreamHandler(sys.stdout)
+
+logging.basicConfig(
+    handlers=(file_log, console_out),
+    format=("[%(asctime)s | %(levelname)s]: %(message)s"),
+    datefmt="%Y-%m-%d %H:%M:%S",
+    level=logging.INFO,
+)
 
 valid_min = lambda min_value: marshmallow.validate.Range(min=min_value)
 valid_min_max = lambda min_value, max_value: marshmallow.validate.Range(
@@ -83,7 +95,7 @@ ParamsSchema = class_schema(Params)
 
 
 def print_err_and_exit(err: str) -> NoReturn:
-    print(f"Ошибка: {err}")
+    logging.error(f"Ошибка: {err}")
     sys.exit()
 
 
@@ -113,6 +125,8 @@ def read_yaml_file(config_path: str) -> Params:
         print_err_and_exit(err)
     except marshmallow.ValidationError as err:
         print_err_and_exit(err)
+    else:
+        logging.info(f"Файл [{config_path}] успешно прочитан.")
 
 
 def cmd_line_parser() -> Tuple[str, str]:
