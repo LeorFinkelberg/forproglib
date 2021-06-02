@@ -29,8 +29,8 @@ README.md
 ### Пример вызова сценария с конфигурационным файлом
 ```sh
 $ python python_scripts/main.py \
-    --config-path configs/gauss_processes_acf.yaml \
-    --output-fig-path figure/gauss_process_exp_acf.pdf
+    --config-path configs/gauss_proc_acf.yaml \
+    --output-fig-path figures/gauss_exp_acf_wstar=1.25.pdf
 ```
 
 ### Приемы работы с потоковым редактором sed
