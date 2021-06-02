@@ -9,16 +9,38 @@ import yaml
 from marshmallow_dataclass import class_schema
 from pathlib2 import Path
 
+_log_format = f"[%(asctime)s | %(levelname)s]: %(message)s"
 
-file_log = logging.FileHandler("app_logs.log")
-console_out = logging.StreamHandler(sys.stdout)
 
-logging.basicConfig(
-    handlers=(file_log, console_out),
-    format=("[%(asctime)s | %(levelname)s]: %(message)s"),
-    datefmt="%Y-%m-%d %H:%M:%S",
-    level=logging.INFO,
-)
+def make_file_handler() -> logging.FileHandler:
+    """
+    Настраивает файловый хендлер
+    """
+    file_handler = logging.FileHandler("app_logs.log")
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(logging.Formatter(_log_format))
+    return file_handler
+
+
+def make_stream_handler() -> logging.FileHandler:
+    """
+    Настравивает потоковый хендлер
+    """
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setLevel(logging.INFO)
+    stream_handler.setFormatter(logging.Formatter(_log_format))
+    return stream_handler
+
+
+def make_logger(logger_name: str) -> logging.Logger:
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(logging.INFO)
+    logger.addHandler(make_file_handler())
+    logger.addHandler(make_stream_handler())
+    return logger
+
+
+logger = make_logger(__name__)
 
 valid_min = lambda min_value: marshmallow.validate.Range(min=min_value)
 valid_min_max = lambda min_value, max_value: marshmallow.validate.Range(
@@ -95,7 +117,7 @@ ParamsSchema = class_schema(Params)
 
 
 def print_err_and_exit(err: str) -> NoReturn:
-    logging.error(f"Ошибка: {err}")
+    logger.error(f"Ошибка: {err}")
     sys.exit()
 
 
@@ -118,15 +140,17 @@ def read_yaml_file(config_path: str) -> Params:
 
     try:
         with open(abspath_to_config_file) as fo:
-            return schema.load(
+            loaded_schema = schema.load(
                 yaml.safe_load(fo)
             )  # вернет обычный словарь Python
+            logger.info(
+                f"Конфигурационный файл {config_path} успешно прочитан."
+            )
+            return loaded_schema
     except ValueError as err:
         print_err_and_exit(err)
     except marshmallow.ValidationError as err:
         print_err_and_exit(err)
-    else:
-        logging.info(f"Файл [{config_path}] успешно прочитан.")
 
 
 def cmd_line_parser() -> Tuple[str, str]:

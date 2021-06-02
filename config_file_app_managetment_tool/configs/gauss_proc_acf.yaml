@@ -14,7 +14,7 @@ alpha: !!float 0.05         # smoothing factor for EWMA
 window_width: !!int 14      # width of window in MA
 delta_t: !!float 0.05       # time step
 N: !!int 1000               # number of counts
-kind_acf: !!int 4           # ACF type
+kind_acf: !!int 1           # ACF type
 
 
 # *** OTHERS APP SETTINGS ***

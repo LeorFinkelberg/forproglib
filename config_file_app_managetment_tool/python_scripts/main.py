@@ -17,6 +17,7 @@ import seaborn as sns
 from helper_funcs_and_class_schema import (
     Params,
     cmd_line_parser,
+    make_logger,
     read_yaml_file,
 )
 from pathlib2 import Path
@@ -58,7 +59,10 @@ def gauss_with_exp_acf_gen(
 
     for n in range(1, N):
         xi[n] = a0 * x[n] + b1 * xi[n - 1]
-
+    logger.info(
+        "Сгенерирована дискретная реализация стационарного "
+        "гауссовского процесса с корреляционной функцией экспоненциального типа"
+    )
     return xi
 
 
@@ -150,6 +154,11 @@ def gauss_with_expcos_acf_gen(
     )
     xi = gauss_with_expcos_family_acf_base(**params)
 
+    logger.info(
+        "Сгенерирована дискретная реализация стационарного "
+        "гауссовского процесса с корреляционной функцией "
+        "экспоненциально-косинусного типа"
+    )
     return xi
 
 
@@ -166,7 +175,7 @@ def gauss_with_expcossin_acf_base(
     Описание
     --------
     Опорный алгоритм построения дискретной реализации ПСП
-    с КФ экспоненциально-косинусно-синусного типа для
+    с КФ экспоненциально-косинусно-синусного типа 
     с учетом знака в сумме гармонических функций КФ
 
     Параметры
@@ -252,6 +261,12 @@ def gauss_with_expcossin_plus_acf_gen(
     )
     xi = gauss_with_expcossin_acf_base(sign="+", **params)
 
+    logger.info(
+        "Сгенерирована дискретная реализация стационарного "
+        "гауссовского процесса с корреляционной функцией "
+        "экспоненциально-косинусно-синусного (плюс) типа"
+    )
+
     return xi
 
 
@@ -290,6 +305,12 @@ def gauss_with_expcossin_minus_acf_gen(
         N=N,
     )
     xi = gauss_with_expcossin_acf_base(sign="-", **params)
+
+    logger.info(
+        "Сгенерирована дискретная реализация стационарного "
+        "гауссовского процесса с корреляционной функцией "
+        "экспоненциально-косинусно-синусного (минус) типа"
+    )
 
     return xi
 
@@ -603,9 +624,12 @@ def draw_graph(
     fig.savefig(
         abspath_to_output_fig, dpi=350, bbox_inches="tight", pad_inches=0.25
     )
+    logger.info(f"Изображение сохранено по пути {abspath_to_output_fig}")
 
 
 if __name__ == "__main__":
+    logger = make_logger(__name__)
+
     path_to_config, path_to_output_figure = cmd_line_parser()
     configs: Params = read_yaml_file(path_to_config)
 
