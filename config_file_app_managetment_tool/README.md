@@ -24,6 +24,7 @@ python_scripts
   `- main.py # главный сценарий приложения
   `- helper_funcs_and_class_schema.py # служебный сценарий
 README.md
+app_start.sh # bash-сценарий для запуска приложения с настройками по умолчанию
 ```
 
 ### Пример вызова сценария с конфигурационным файлом
@@ -31,6 +32,8 @@ README.md
 $ python python_scripts/main.py \
     --config-path configs/gauss_proc_acf.yaml \
     --output-fig-path figures/gauss_exp_acf_wstar=1.25.pdf
+# или просто вызвать bash-сценарий
+./app_start.sh
 ```
 
 ### Приемы работы с потоковым редактором sed
