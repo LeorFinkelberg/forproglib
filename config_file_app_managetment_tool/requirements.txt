@@ -1,0 +1,9 @@
+logging
+dataclasses
+marshmallow
+pyyaml
+marshmallow_dataclass
+pathlib2
+matplotlib
+numpy
+pandas
